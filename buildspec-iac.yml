@@ -1,0 +1,21 @@
+version: 0.2
+
+env:
+  variables:
+    SOFT_FAIL: "true"
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - yum install -y libxcrypt-compat
+      - pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.14.2/accuknox_aspm_scanner-0.14.2-py3-none-any.whl --break-system-packages
+
+  build:
+    commands:
+      - echo "Listing files"
+      - ls -R
+      - accuknox-aspm-scanner tool install --type iac
+      - accuknox-aspm-scanner scan --softfail iac --path .
+
