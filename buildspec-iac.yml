@@ -1,0 +1,47 @@
+```yaml
+version: 0.2
+
+env:
+  variables:
+    SOFT_FAIL: "true"
+    DIRECTORY: "."
+    COMPACT: "true"
+    QUIET: "false"
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - echo "Installing dependencies..."
+      - yum install -y libxcrypt-compat
+      - pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.14.2/accuknox_aspm_scanner-0.14.2-py3-none-any.whl --break-system-packages
+
+  build:
+    commands:
+      - |
+        echo "===== DEBUG: FILES ====="
+        pwd
+        ls -R
+
+        echo "Running AccuKnox IaC scan"
+
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+        fi
+
+        CMD_ARGS=""
+        if [ -n "$DIRECTORY" ]; then
+          CMD_ARGS="$CMD_ARGS --directory $DIRECTORY"
+        fi
+        if [ "$COMPACT" = "true" ]; then
+          CMD_ARGS="$CMD_ARGS --compact"
+        fi
+        if [ "$QUIET" = "true" ]; then
+          CMD_ARGS="$CMD_ARGS --quiet"
+        fi
+
+        echo "Executing scan..."
+        accuknox-aspm-scanner tool install --type iac
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --path .
+```
