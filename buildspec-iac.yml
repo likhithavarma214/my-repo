@@ -10,6 +10,7 @@ phases:
       python: 3.11
     commands:
       - yum install -y libxcrypt-compat
+      - yum install -y glibc
       - pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.14.2/accuknox_aspm_scanner-0.14.2-py3-none-any.whl --break-system-packages
 
   build:
