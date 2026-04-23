@@ -5,19 +5,23 @@ env:
     SOFT_FAIL: "true"
 
 phases:
-  pre_build:
+  install:
+    runtime-versions:
+      python: 3.11   # 👈 force compatible python (important)
     commands:
-      - echo "Installing AccuKnox ASPM scanner..."
+      - echo "Installing system dependencies..."
+      - yum install -y libxcrypt-compat   # 👈 fixes libcrypt error
+
+      - echo "Installing AccuKnox ASPM scanner v0.14.2..."
       - pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.14.2/accuknox_aspm_scanner-0.14.2-py3-none-any.whl --break-system-packages
 
   build:
     commands:
-      - echo "Running AccuKnox sast scan"
+      - echo "Running AccuKnox SAST scan"
       - |
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
         fi
-        echo "Installing AccuKnox scanner..."
-        echo "Running SAST scan..."
+
         accuknox-aspm-scanner tool install --type sast
         accuknox-aspm-scanner scan $SOFT_FAIL_ARG sast --command "scan ."
