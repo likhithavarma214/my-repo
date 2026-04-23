@@ -1,0 +1,23 @@
+version: 0.2
+
+env:
+  variables:
+    SOFT_FAIL: "true"
+
+phases:
+  pre_build:
+    commands:
+      - echo "Installing AccuKnox ASPM scanner..."
+      - pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.14.2/accuknox_aspm_scanner-0.13.4-py3-none-any.whl --break-system-packages
+
+  build:
+    commands:
+      - echo "Running AccuKnox sast scan"
+      - |
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+        fi
+        echo "Installing AccuKnox scanner..."
+        echo "Running SAST scan..."
+        accuknox-aspm-scanner tool install --type sast
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG sast --command "scan ."
