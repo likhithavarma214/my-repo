@@ -19,5 +19,4 @@ phases:
       - echo "Listing files"
       - ls -R
       - accuknox-aspm-scanner tool install --type iac
-      - accuknox-aspm-scanner scan --softfail iac --container-mode --command "."
-
+      - accuknox-aspm-scanner scan --softfail iac --container-mode --command "--directory ."
