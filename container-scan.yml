@@ -8,27 +8,32 @@ env:
     IMAGE_TAR: "image.tar"
 
 phases:
-  pre_build:
+  install:
+    runtime-versions:
+      python: 3.11   
     commands:
+      - echo "Installing dependencies..."
+      - yum install -y docker
+      - service docker start
+
       - echo "Installing AccuKnox ASPM scanner..."
       - pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.14.2/accuknox_aspm_scanner-0.14.2-py3-none-any.whl --break-system-packages
+
   build:
     commands:
-      - |
-        echo "Running AccuKnox container scan"
-        docker build -t $IMAGE:$IMAGE_TAG -f Dockerfile .
-        docker save -o $IMAGE_TAR $IMAGE:$IMAGE_TAG
-        docker load -i $IMAGE_TAR
-        if [ "$SOFT_FAIL" = "true" ]; then
-          SOFT_FAIL_ARG="--softfail"
-        fi
-        CMD="image $IMAGE_NAME"
-        [ -n "$IMAGE_TAG" ] && CMD="image $IMAGE:$IMAGE_TAG"
-        [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
-        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
+      - echo "Running AccuKnox container scan"
+
+      - docker build -t $IMAGE:$IMAGE_TAG .
+      - docker save -o $IMAGE_TAR $IMAGE:$IMAGE_TAG
+
+      - if [ "$SOFT_FAIL" = "true" ]; then SOFT_FAIL_ARG="--softfail"; fi
+
+      - CMD="image $IMAGE:$IMAGE_TAG"
+
+      - echo "Executing scan..."
+      - accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
 
 artifacts:
   files:
     - '**/*'
-    - $IMAGE_TAR
+    - image.tar
